@@ -21,13 +21,17 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     void refreshTablesCombobox();
     void refreshTableView();
+    bool connectDB();
     ~MainWindow();
     
+public slots:
+    void updateInfo();
+
 private slots:
     void on_dbComboBox_currentIndexChanged(const QString &selectedDB);
     void on_tableComboBox_currentIndexChanged(const QString &selectedTable);
-
     void on_addButton_clicked();
+    void on_dropButton_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -35,6 +39,7 @@ private:
     QSqlQuery *dbComboboxQuery;
     QSqlQuery *tableComboboxQuery;
     QSqlQueryModel *model;
+    QString updateTablesString;
 
     QLabel *statusBarDB;
     QLabel *statusBarTable;

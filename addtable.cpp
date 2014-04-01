@@ -15,7 +15,7 @@ AddTable::AddTable(QWidget *parent, QString sourceDB) : QDialog(parent), ui(new 
     ui->removeButton->setIcon(*removeIcon);
 
     // where to save table
-    dbName = sourceDB;
+    db = sourceDB;
 
     model = new QStandardItemModel();
     model->setColumnCount(3);
@@ -28,18 +28,16 @@ AddTable::AddTable(QWidget *parent, QString sourceDB) : QDialog(parent), ui(new 
     ui->tableView->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 
     // connecting to database
-    dbConnection = QSqlDatabase::addDatabase("QMYSQL");
-    dbConnection.setHostName("127.0.0.1");
-    dbConnection.setUserName("root");
-    dbConnection.setPassword("123");
-    dbConnection.setDatabaseName(dbName);
+    dbConnection = QSqlDatabase::database("general");
 
     // FIXME: make func checkConnection.
     bool connected = dbConnection.open();
 
     if(!connected)
-        qCritical() << "Error opening database";
+        qCritical() << "Error opening database.";
 }
+
+
 
 AddTable::~AddTable()
 {
@@ -47,18 +45,24 @@ AddTable::~AddTable()
 
     delete addIcon;
     delete removeIcon;
-//    dbConnection.close();
+    dbConnection.close();
 }
+
+
 
 void AddTable::on_cancelButton_clicked()
 {
     this->reject();
 }
 
+
+
 void AddTable::on_addButton_clicked()
 {
     model->insertRow(model->rowCount());
 }
+
+
 
 void AddTable::on_removeButton_clicked()
 {
@@ -66,11 +70,12 @@ void AddTable::on_removeButton_clicked()
     model->removeRow(currentIndex.row());
 }
 
+
+
 void AddTable::on_saveButton_clicked()
 {
     QString output;
     /*QList<QString>*/ QStringList parsedOutput[model->rowCount()];
-
 
     QModelIndex item;
     for(int i = 0; i < model->rowCount(); i++)
@@ -84,9 +89,6 @@ void AddTable::on_saveButton_clicked()
         parsedOutput[i] = output.split(" ");
         output.clear();
     }
-
-//    for(int i = 0; i < model->rowCount(); i++)
-//        qDebug() << parsedOutput[i];
 
     QString finalString;
 
@@ -113,7 +115,7 @@ void AddTable::on_saveButton_clicked()
     qDebug() << query->exec(finalString);
     qDebug() << query->lastError().text();
 
-    dbConnection.close();
-
     this->accept();
+
+    delete query;
 }

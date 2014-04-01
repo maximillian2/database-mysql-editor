@@ -13,7 +13,8 @@ class AddTable;
 class AddTable : public QDialog
 {
     Q_OBJECT
-    
+
+
 public:
     explicit AddTable(QWidget *parent = 0, QString sourceDB = 0);
     ~AddTable();
@@ -32,7 +33,7 @@ private:
     QIcon *addIcon;
     QIcon *removeIcon;
     QStandardItemModel *model;
-    QString dbName;
+    QString db;
     QSqlDatabase dbConnection;
 };
 
