@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
+// classes with windows
 #include "addtable.h"
+#include "altertable.h"
 
 #include <QMessageBox>
 #include <QSqlError>
@@ -8,7 +11,6 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-    qDebug() << "Start of constructor.";
     ui->setupUi(this);
 
     statusBarDB     = new QLabel();
@@ -32,8 +34,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     }
 
     ui->dbComboBox->addItems(tablesComboboxList);
-
-    qDebug() << "End of constructor.";
 }
 
 
@@ -46,6 +46,8 @@ MainWindow::~MainWindow()
     db.close();
 }
 
+
+
 void MainWindow::updateInfo()
 {
     refreshTablesCombobox();
@@ -56,26 +58,17 @@ void MainWindow::updateInfo()
 
 void MainWindow::on_dbComboBox_currentIndexChanged(const QString &selectedDB)
 {
-        qDebug() << "Start of on_dbComboBox_currentIndexChanged.";
-
         db.setDatabaseName(selectedDB);
         updateTablesString = selectedDB;
         refreshTablesCombobox();
-
-        qDebug() << "End of on_dbComboBox_currentIndexChanged.";
 }
 
 
 
 void MainWindow::on_tableComboBox_currentIndexChanged(const QString &selectedTable)
 {
-    qDebug() << "Start of on_tableComboBox_currentIndexChanged.";
-
     model = new QSqlQueryModel;
-
-    // FUCKING BUG was HERE!!!!!!!!!
     model->setQuery("select column_name from information_schema.columns where table_name='" + selectedTable + "'", QSqlDatabase::database("general"));
-    // -------------------------
 
     refreshTableView();
 
@@ -91,20 +84,15 @@ void MainWindow::on_tableComboBox_currentIndexChanged(const QString &selectedTab
 
     statusBarRows->setText("Rows: " + QString("%1").arg(model->rowCount()));
     ui->statusBar->addWidget(statusBarRows);
-
-
-    qDebug() << "End of on_tableComboBox_currentIndexChanged.";
 }
 
 
 
 void MainWindow::refreshTableView()
 {
-    qDebug() << "Start refreshTableView()";
     ui->tableView->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     ui->tableView->setModel(model);
     ui->tableView->show();
-    qDebug() << "End of refreshTableView()";
 }
 
 
@@ -131,11 +119,8 @@ bool MainWindow::connectDB()
 
 void MainWindow::refreshTablesCombobox()
 {
-    qDebug() << "Start of refreshTablesCombobox.";
-
     tableComboboxQuery = new QSqlQuery(db);
-    qDebug() << "Exec result:";
-    qDebug() << tableComboboxQuery->exec("show tables from " + updateTablesString + ";");
+    tableComboboxQuery->exec("SHOW TABLES FROM " + updateTablesString + ";");
 
     ui->tableComboBox->clear();
 
@@ -143,39 +128,40 @@ void MainWindow::refreshTablesCombobox()
 
     while(tableComboboxQuery->next())
     {
-            columnComboboxList << tableComboboxQuery->value(0).toString();
+         columnComboboxList << tableComboboxQuery->value(0).toString();
     }
     ui->tableComboBox->addItems(columnComboboxList);
-
-    qDebug() << "End of refreshTablesCombobox.";
 }
 
 
 
 void MainWindow::on_addButton_clicked()
 {
-    qDebug() << "Start of on_addButton_clicked().";
     AddTable *table = new AddTable(this, ui->dbComboBox->currentText());
-
     table->setModal(true);
     table->show();
 
     connect(table, SIGNAL(finished(int)), this, SLOT(updateInfo()));
-
-    qDebug() << "Stop of on_addButton_clicked().";
 }
 
 
 
 void MainWindow::on_dropButton_clicked()
 {
-    qDebug() << "Start of on_dropButton_clicked().";
+//    QSqlQuery query(db);
+//    query.exec("DROP TABLE " + ui->dbComboBox->currentText() + "." + ui->tableComboBox->currentText() + ";");
+//    refreshTablesCombobox();
 
-    QSqlQuery query(db);
-    query.exec("DROP TABLE " + ui->dbComboBox->currentText() + "." + ui->tableComboBox->currentText() + ";");
+    qDebug() << "Deleted " << ui->dbComboBox->currentText() << "->" << ui->tableComboBox->currentText() ;
+}
 
 
-    refreshTablesCombobox();
 
-    qDebug() << "Stop of on_dropButton_clicked().";
+void MainWindow::on_alterButton_clicked()
+{
+    AlterTable *alterTable = new AlterTable(this, ui->tableComboBox->currentText());
+    alterTable->setModal(true);
+    alterTable->show();
+
+    connect(alterTable, SIGNAL(finished(int)), this, SLOT(updateInfo()));
 }

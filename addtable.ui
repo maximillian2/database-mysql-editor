@@ -47,12 +47,20 @@
          <property name="text">
           <string/>
          </property>
+         <property name="icon">
+          <iconset resource="images.qrc">
+           <normaloff>:/images/square-add.png</normaloff>:/images/square-add.png</iconset>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="removeButton">
          <property name="text">
           <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="images.qrc">
+           <normaloff>:/images/square-cross.png</normaloff>:/images/square-cross.png</iconset>
          </property>
         </widget>
        </item>
@@ -106,6 +114,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="images.qrc"/>
+ </resources>
  <connections/>
 </ui>

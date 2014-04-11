@@ -8,11 +8,11 @@ AddTable::AddTable(QWidget *parent, QString sourceDB) : QDialog(parent), ui(new 
 {
     ui->setupUi(this);
 
-    addIcon = new QIcon(":/images/square-add.png");
-    removeIcon = new QIcon(":/images/square-cross.png");
+//    addIcon = new QIcon(":/images/square-add.png");
+//    removeIcon = new QIcon(":/images/square-cross.png");
 
-    ui->addButton->setIcon(*addIcon);
-    ui->removeButton->setIcon(*removeIcon);
+//    ui->addButton->setIcon(*addIcon);
+//    ui->removeButton->setIcon(*removeIcon);
 
     // where to save table
     db = sourceDB;
@@ -42,9 +42,6 @@ AddTable::AddTable(QWidget *parent, QString sourceDB) : QDialog(parent), ui(new 
 AddTable::~AddTable()
 {
     delete ui;
-
-    delete addIcon;
-    delete removeIcon;
     dbConnection.close();
 }
 

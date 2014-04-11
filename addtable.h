@@ -30,8 +30,6 @@ private slots:
 
 private:
     Ui::AddTable *ui;
-    QIcon *addIcon;
-    QIcon *removeIcon;
     QStandardItemModel *model;
     QString db;
     QSqlDatabase dbConnection;
