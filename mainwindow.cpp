@@ -34,6 +34,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     }
 
     ui->dbComboBox->addItems(tablesComboboxList);
+
+
+    QStringList typeList;
+    typeList << "integer" << "varchar" << "float" << "boolean" << "date";
+    ui->typesComboBox->addItems(typeList);
+
 }
 
 
