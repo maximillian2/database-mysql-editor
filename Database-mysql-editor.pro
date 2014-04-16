@@ -12,16 +12,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    addtable.cpp \
-    altertable.cpp
+    addtable.cpp
 
 HEADERS  += mainwindow.h \
-    addtable.h \
-    altertable.h
+    addtable.h
 
 FORMS    += mainwindow.ui \
-    addtable.ui \
-    altertable.ui
+    addtable.ui
 
 RESOURCES += \
     images.qrc

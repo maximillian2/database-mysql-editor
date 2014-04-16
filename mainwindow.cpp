@@ -3,11 +3,11 @@
 
 // classes with windows
 #include "addtable.h"
-#include "altertable.h"
 
 #include <QMessageBox>
 #include <QSqlError>
 #include <QDebug>
+#include <QSqlQuery>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     sbSeparator2 = new QFrame();
     sbSeparator2->setFrameStyle(QFrame::VLine | QFrame::Sunken);
 
-    qDebug() << "Connect result: " << connectDB();
+    connectDB();
 
     dbComboboxQuery = new QSqlQuery("SHOW DATABASES;", db);
 
@@ -35,11 +35,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->dbComboBox->addItems(tablesComboboxList);
 
+    stringToRemove = '0';     // default value
+    model->setHeaderData(0, Qt::Horizontal, tr("Column name"));
 
+    // set up alter field
     QStringList typeList;
     typeList << "integer" << "varchar" << "float" << "boolean" << "date";
     ui->typesComboBox->addItems(typeList);
 
+    qDebug() << ui->alterTableLayout->count();
+//    for(int i = 0; i < ui->alterTableLayout->count(); i++)
+//    {
+//      ui->alterTableLayout->itemAt(i)->widget()->setVisible(false);
+//    }
+    ui->rowLineEdit->setEnabled(false);
+    ui->typesComboBox->setEnabled(false);
+    ui->lengthSpinBox->setEnabled(false);
+    ui->addRowButton->setEnabled(false);
+    ui->deleteRowButton->setEnabled(false);
 }
 
 
@@ -121,7 +134,12 @@ bool MainWindow::connectDB()
     return true;
 }
 
-
+void MainWindow::setDefaultFields()
+{
+    ui->rowLineEdit->clear();
+    ui->lengthSpinBox->setValue(0); // ??
+    ui->typesComboBox->setCurrentIndex(0);
+}
 
 void MainWindow::refreshTablesCombobox()
 {
@@ -139,8 +157,6 @@ void MainWindow::refreshTablesCombobox()
     ui->tableComboBox->addItems(columnComboboxList);
 }
 
-
-
 void MainWindow::on_addButton_clicked()
 {
     AddTable *table = new AddTable(this, ui->dbComboBox->currentText());
@@ -149,8 +165,6 @@ void MainWindow::on_addButton_clicked()
 
     connect(table, SIGNAL(finished(int)), this, SLOT(updateInfo()));
 }
-
-
 
 void MainWindow::on_dropButton_clicked()
 {
@@ -161,13 +175,56 @@ void MainWindow::on_dropButton_clicked()
     qDebug() << "Deleted " << ui->dbComboBox->currentText() << "->" << ui->tableComboBox->currentText() ;
 }
 
-
-
-void MainWindow::on_alterButton_clicked()
+void MainWindow::on_checkBox_toggled(bool checked)
 {
-    AlterTable *alterTable = new AlterTable(this, ui->tableComboBox->currentText());
-    alterTable->setModal(true);
-    alterTable->show();
+    setDefaultFields();
 
-    connect(alterTable, SIGNAL(finished(int)), this, SLOT(updateInfo()));
+    if(checked)
+    {
+        ui->rowLineEdit->setEnabled(true);
+        ui->typesComboBox->setEnabled(true);
+        ui->lengthSpinBox->setEnabled(true);
+        ui->addRowButton->setEnabled(true);
+        ui->deleteRowButton->setEnabled(true);
+    } else {
+        ui->rowLineEdit->setEnabled(false);
+        ui->typesComboBox->setEnabled(false);
+        ui->lengthSpinBox->setEnabled(false);
+        ui->addRowButton->setEnabled(false);
+        ui->deleteRowButton->setEnabled(false);
+    }
+}
+
+void MainWindow::on_addRowButton_clicked()
+{
+    QString completeString;
+    int length = ui->lengthSpinBox->value();
+
+    completeString = "ALTER TABLE " + ui->tableComboBox->currentText()
+                    + " ADD " + ui->rowLineEdit->text() + " " + ui->typesComboBox->currentText()
+                    + "(" + QString::number(length) + ")";
+
+    // open connection to write things
+    QSqlDatabase::database("general").open();
+    QSqlQuery* query = new QSqlQuery(QSqlDatabase::database("general"));
+    query->exec(completeString);
+
+    // TODO: clean all fields after toggling 'alter'
+    // clean up some code :/
+    updateInfo();
+}
+
+void MainWindow::on_deleteRowButton_clicked()
+{
+    QSqlDatabase::database("general").open();
+    QSqlQuery* deleteQuery = new QSqlQuery(QSqlDatabase::database("general"));
+
+    deleteQuery->exec("ALTER TABLE " + ui->tableComboBox->currentText() + " DROP COLUMN " + stringToRemove + ";");
+    updateInfo();
+}
+
+void MainWindow::on_tableView_clicked(const QModelIndex &index)
+{
+    QVariant variant = index.data();
+    stringToRemove = variant.toString();
 }

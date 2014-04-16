@@ -22,6 +22,7 @@ public:
     void refreshTablesCombobox();
     void refreshTableView();
     bool connectDB();
+    void setDefaultFields();
     ~MainWindow();
     
 public slots:
@@ -32,7 +33,10 @@ private slots:
     void on_tableComboBox_currentIndexChanged(const QString &selectedTable);
     void on_addButton_clicked();
     void on_dropButton_clicked();
-    void on_alterButton_clicked();
+    void on_checkBox_toggled(bool checked);
+    void on_addRowButton_clicked();
+    void on_deleteRowButton_clicked();
+    void on_tableView_clicked(const QModelIndex &index);
 
 private:
     Ui::MainWindow *ui;
@@ -41,6 +45,7 @@ private:
     QSqlQuery *tableComboboxQuery;
     QSqlQueryModel *model;
     QString updateTablesString;
+    QString stringToRemove;
 
     QLabel *statusBarDB;
     QLabel *statusBarTable;
